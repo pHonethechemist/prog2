@@ -52,7 +52,7 @@ void normalmultiply(matrix a, corner ac, matrix b, corner bc, matrix p, int d) {
         sum += a.m[((i + ac.toprow) * a.od) + k + ac.leftcolumn] * 
           b.m[((k + bc.toprow) * b.od) + j + bc.leftcolumn];
       }
-      p.m[(i * b.od) + j] = sum;
+      p.m[(i * p.od) + j] = sum;
     }
   }
 }
@@ -113,18 +113,26 @@ void strass(matrix a, corner ac, matrix b, corner bc, matrix p, int d, int n0) {
     corner topright = {0, hd};
     corner bottomleft = {hd, 0};
     corner bottomright = {hd, hd};
+    // atopleft = ac (no need to change this...)
+    corner atopright = {ac.toprow, ac.leftcolumn + hd};
+    corner abottomleft = {ac.toprow + hd, ac.leftcolumn};
+    corner abottomright = {ac.toprow + hd, ac.leftcolumn + hd};
+    // btopleft = bc (same)
+    corner btopright = {bc.toprow, bc.leftcolumn + hd};
+    corner bbottomleft = {bc.toprow + hd, bc.leftcolumn};
+    corner bbottomright = {bc.toprow + hd, bc.leftcolumn + hd};
 
     // calculating the matrices necessary to get the p1 through p7
-    subtract(b, topright, b, bottomright, fmhm, topleft, hd);
-    add(a, topleft, a, topright, apbm, topleft, hd);
-    add(a, bottomleft, a, bottomright, cpdm, topleft, hd);
-    subtract(b, bottomleft, b, topleft, gmem, topleft, hd);
-    add(a, topleft, a, bottomright, apdm, topleft, hd);
-    add(b, topleft, b, bottomright, ephm, topleft, hd);
-    subtract(a, topright, a, bottomright,  bmdm, topleft, hd);
-    add(b, bottomleft, b, bottomright, gphm, topleft, hd);
-    subtract(a, topleft, a, bottomleft, amcm, topleft, hd);
-    add(b, topleft, b, topright, epfm, topleft, hd);
+    subtract(b, btopright, b, bbottomright, fmhm, topleft, hd);
+    add(a, ac, a, atopright, apbm, topleft, hd);
+    add(a, abottomleft, a, abottomright, cpdm, topleft, hd);
+    subtract(b, bbottomleft, b, bc, gmem, topleft, hd);
+    add(a, ac, a, abottomright, apdm, topleft, hd);
+    add(b, bc, b, bbottomright, ephm, topleft, hd);
+    subtract(a, atopright, a, abottomright,  bmdm, topleft, hd);
+    add(b, bbottomleft, b, bbottomright, gphm, topleft, hd);
+    subtract(a, ac, a, abottomleft, amcm, topleft, hd);
+    add(b, bc, b, btopright, epfm, topleft, hd);
     /* 
     printf("%d\n", fmhm.m[0]);
     printf("%d\n", apbm.m[0]);
@@ -140,22 +148,45 @@ void strass(matrix a, corner ac, matrix b, corner bc, matrix p, int d, int n0) {
 
 
     // calculating p1 through p7
-    strass(a, topleft, fmhm, topleft, p1m, hd, n0);
-    strass(apbm, topleft, b, bottomright, p2m, hd, n0);
-    strass(cpdm, topleft, b, topleft, p3m, hd, n0);
-    strass(a, bottomright, gmem, topleft, p4m, hd, n0);
+    /*
+    normalmultiply(a, topleft, fmhm, topleft, p1m, hd);
+    normalmultiply(apbm, topleft, b, bottomright, p2m, hd);
+    normalmultiply(cpdm, topleft, b, topleft, p3m, hd);
+    normalmultiply(a, bottomright, gmem, topleft, p4m, hd);
+    normalmultiply(apdm, topleft, ephm, topleft, p5m, hd);
+    normalmultiply(bmdm, topleft, gphm, topleft, p6m, hd);
+    normalmultiply(amcm, topleft, epfm, topleft, p7m, hd);
+    */
+    strass(a, ac, fmhm, topleft, p1m, hd, n0);
+    strass(apbm, topleft, b, bbottomright, p2m, hd, n0);
+    strass(cpdm, topleft, b, bc, p3m, hd, n0);
+    strass(a, abottomright, gmem, topleft, p4m, hd, n0);
     strass(apdm, topleft, ephm, topleft, p5m, hd, n0);
     strass(bmdm, topleft, gphm, topleft, p6m, hd, n0);
     strass(amcm, topleft, epfm, topleft, p7m, hd, n0);
     /*
-    printf("%d\n", p1[0]);
-    printf("%d\n", p2[0]);
-    printf("%d\n", p3[0]);
-    printf("%d\n", p4[0]);
-    printf("%d\n", p5[0]);
-    printf("%d\n", p6[0]);
-    printf("%d\n", p7[0]);
-    */
+    for (int i = 0; i < hd; ++i)
+      for (int j = 0; j < hd; ++j)
+        printf("%d\n", p1[(i * hd) + j]);
+    for (int i = 0; i < hd; ++i)
+      for (int j = 0; j < hd; ++j)
+        printf("%d\n", p2[(i * hd) + j]);
+    for (int i = 0; i < hd; ++i)
+      for (int j = 0; j < hd; ++j)
+        printf("%d\n", p3[(i * hd) + j]);
+    for (int i = 0; i < hd; ++i)
+      for (int j = 0; j < hd; ++j)
+        printf("%d\n", p4[(i * hd) + j]);
+    for (int i = 0; i < hd; ++i)
+      for (int j = 0; j < hd; ++j)
+        printf("%d\n", p5[(i * hd) + j]);
+    for (int i = 0; i < hd; ++i)
+      for (int j = 0; j < hd; ++j)
+        printf("%d\n", p6[(i * hd) + j]);
+    for (int i = 0; i < hd; ++i)
+      for (int j = 0; j < hd; ++j)
+        printf("%d\n", p7[(i * hd) + j]);
+        */
 
     // calculating the four submatrices
     add(p6m, topleft, add(p5m, topleft, subtract(p4m, topleft, p2m, topleft, p, topleft, hd), topleft, p, topleft, hd), topleft, p, topleft, hd);
@@ -193,10 +224,13 @@ int main(int argc, char *argv[]) {
       b[(i * d) + j] = atoi(buf);
     }
   }
+  fclose(f);
 
   memset(s, 0, d * d * sizeof(int));
 
   corner zero = {0,0};
+  corner bottomright = {d / 2, d / 2};
+  corner topright = {0, d / 2};
 
   matrix am = {a, d},
          bm = {b, d},
@@ -204,11 +238,13 @@ int main(int argc, char *argv[]) {
 
   strass(am, zero, bm, zero, sm, d, 1);
 
+  
   for (int i = 0; i < d; ++i) {
     for (int j = 0; j < d; ++j) {
       printf("%d\n", s[(i * d) + j]);
     }
   }
+  
 
   free(s); free(a); free(b);
 
