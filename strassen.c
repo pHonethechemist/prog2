@@ -226,7 +226,6 @@ int main(int argc, char *argv[]) {
   }
   fclose(f);
 
-  memset(s, 0, d * d * sizeof(int));
 
   corner zero = {0,0};
   corner bottomright = {d / 2, d / 2};
@@ -236,13 +235,21 @@ int main(int argc, char *argv[]) {
          bm = {b, d},
          sm = {s, d};
 
-  strass(am, zero, bm, zero, sm, d, 1);
+  for (int i = 1; i < (1 << 8); i = i << 1) {
+    memset(s, 0, d * d * sizeof(int));
+    clock_t start = clock(), elapsed;
+    strass(am, zero, bm, zero, sm, d, i);
+    elapsed = clock() - start;
+    int t = elapsed * 1000000 / CLOCKS_PER_SEC;
+    int sec = t / 1000000;
+    int ms = (t - (sec * 1000000)) / 1000;
+    int us = t % 1000;
+    printf("n0 = %d: %ds%dms%dus\n", i, sec, ms, us);
+  }
 
   
   for (int i = 0; i < d; ++i) {
-    for (int j = 0; j < d; ++j) {
-      printf("%d\n", s[(i * d) + j]);
-    }
+    printf("%d\n", s[(i * d) + i]);
   }
   
 
