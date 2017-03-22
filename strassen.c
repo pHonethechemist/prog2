@@ -112,48 +112,26 @@ void strass(matrix a, corner ac, matrix b, corner bc, matrix p, int d, int n0) {
 
 
   } else {
-    size_t ns = d * d * sizeof(int) / 4;
-    int *p1 = (int *) malloc(ns),
-        *p2 = (int *) malloc(ns),
-        *p3 = (int *) malloc(ns),
-        *p4 = (int *) malloc(ns),
-        *p5 = (int *) malloc(ns),
-        *p6 = (int *) malloc(ns),
-        *p7 = (int *) malloc(ns),
-        *fmh = (int *) malloc(ns),
-        *apb = (int *) malloc(ns),
-        *cpd = (int *) malloc(ns),
-        *gme = (int *) malloc(ns),
-        *apd = (int *) malloc(ns),
-        *eph = (int *) malloc(ns),
-        *bmd = (int *) malloc(ns),
-        *gph = (int *) malloc(ns),
-        *amc = (int *) malloc(ns),
+    size_t items = d * d / 4;
+    size_t size = sizeof(int);
+    size_t ns = items * size;
+    int *p1 = (int *) calloc(items, size), *p2 = (int *) calloc(items, size),
+        *p3 = (int *) calloc(items, size), *p4 = (int *) calloc(items, size),
+        *p5 = (int *) calloc(items, size), *p6 = (int *) calloc(items, size),
+        *p7 = (int *) calloc(items, size), *fmh = (int *) malloc(ns),
+        *apb = (int *) malloc(ns), *cpd = (int *) malloc(ns),
+        *gme = (int *) malloc(ns), *apd = (int *) malloc(ns),
+        *eph = (int *) malloc(ns), *bmd = (int *) malloc(ns),
+        *gph = (int *) malloc(ns), *amc = (int *) malloc(ns),
         *epf = (int *) malloc(ns);
-    memset(p1, 0, ns); memset(p2, 0, ns); memset(p3, 0, ns); memset(p4, 0, ns);
-    memset(p5, 0, ns); memset(p6, 0, ns); memset(p7, 0, ns);
     int hd = d / 2;
-    matrix p1m = {p1, hd},
-           p2m = {p2, hd},
-           p3m = {p3, hd},
-           p4m = {p4, hd},
-           p5m = {p5, hd},
-           p6m = {p6, hd},
-           p7m = {p7, hd},
-           fmhm = {fmh, hd},
-           apbm = {apb, hd},
-           cpdm = {cpd, hd},
-           gmem = {gme, hd},
-           apdm = {apd, hd},
-           ephm = {eph, hd},
-           bmdm = {bmd, hd},
-           gphm = {gph, hd},
-           amcm = {amc, hd},
-           epfm = {epf, hd};
-    corner topleft = {0, 0};
-    corner topright = {0, hd};
-    corner bottomleft = {hd, 0};
-    corner bottomright = {hd, hd};
+    matrix p1m = {p1, hd}, p2m = {p2, hd}, p3m = {p3, hd}, p4m = {p4, hd},
+           p5m = {p5, hd}, p6m = {p6, hd}, p7m = {p7, hd}, fmhm = {fmh, hd},
+           apbm = {apb, hd}, cpdm = {cpd, hd}, gmem = {gme, hd},
+           apdm = {apd, hd}, ephm = {eph, hd}, bmdm = {bmd, hd},
+           gphm = {gph, hd}, amcm = {amc, hd}, epfm = {epf, hd};
+    corner topleft = {0, 0}, topright = {0, hd}, bottomleft = {hd, 0},
+           bottomright = {hd, hd};
     // atopleft = ac (no need to change this...)
     corner atopright = {ac.toprow, ac.leftcolumn + hd};
     corner abottomleft = {ac.toprow + hd, ac.leftcolumn};
@@ -174,30 +152,8 @@ void strass(matrix a, corner ac, matrix b, corner bc, matrix p, int d, int n0) {
     add(b, bbottomleft, b, bbottomright, gphm, topleft, hd);
     subtract(a, ac, a, abottomleft, amcm, topleft, hd);
     add(b, bc, b, btopright, epfm, topleft, hd);
-    /* 
-    printf("%d\n", fmhm.m[0]);
-    printf("%d\n", apbm.m[0]);
-    printf("%d\n", cpdm.m[0]);
-    printf("%d\n", gmem.m[0]);
-    printf("%d\n", apdm.m[0]);
-    printf("%d\n", ephm.m[0]);
-    printf("%d\n", bmdm.m[0]);
-    printf("%d\n", gphm.m[0]);
-    printf("%d\n", amcm.m[0]);
-    printf("%d\n", epfm.m[0]);
-    */ 
-
 
     // calculating p1 through p7
-    /*
-    normalmultiply(a, topleft, fmhm, topleft, p1m, hd);
-    normalmultiply(apbm, topleft, b, bottomright, p2m, hd);
-    normalmultiply(cpdm, topleft, b, topleft, p3m, hd);
-    normalmultiply(a, bottomright, gmem, topleft, p4m, hd);
-    normalmultiply(apdm, topleft, ephm, topleft, p5m, hd);
-    normalmultiply(bmdm, topleft, gphm, topleft, p6m, hd);
-    normalmultiply(amcm, topleft, epfm, topleft, p7m, hd);
-    */
     strass(a, ac, fmhm, topleft, p1m, hd, n0);
     strass(apbm, topleft, b, bbottomright, p2m, hd, n0);
     strass(cpdm, topleft, b, bc, p3m, hd, n0);
@@ -269,14 +225,12 @@ int main(int argc, char *argv[]) {
 
 
   corner zero = {0,0};
-  corner bottomright = {d / 2, d / 2};
-  corner topright = {0, d / 2};
 
   matrix am = {a, d},
          bm = {b, d},
          sm = {s, d};
 
-  for (int i = 1; i < (1 << 8); i = i << 1) {
+  for (int i = 1 << 3; i < (1 << 8); i = i << 1) {
     memset(s, 0, d * d * sizeof(int));
     clock_t start = clock(), elapsed;
     strass(am, zero, bm, zero, sm, d, i);
@@ -287,6 +241,16 @@ int main(int argc, char *argv[]) {
     int us = t % 1000;
     printf("n0 = %d: %ds%dms%dus\n", i, sec, ms, us);
   }
+
+  clock_t start = clock(), elapsed;
+  normalmultiply(am, zero, bm, zero, sm, d);
+  elapsed = clock() - start;
+  int t = elapsed * 1000000 / CLOCKS_PER_SEC;
+  int sec = t / 1000000;
+  int ms = (t - (sec * 1000000)) / 1000;
+  int us = t % 1000;
+  printf("normalmultiply: %ds%dms%dus\n", sec, ms, us);
+
 
   
   for (int i = 0; i < d; ++i) {
