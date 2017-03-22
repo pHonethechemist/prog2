@@ -70,19 +70,35 @@ void strass(matrix a, corner ac, matrix b, corner bc, matrix p, int d, int n0) {
     // the last column and row when writing to p (through add and subtract)
     // because that column and row will be 0 anyway and won't fit into p
 
-    size_t ns = (d+1) * (d+1) * sizeof(int);
+    size_t items = (d + 1) * (d + 1);
+    size_t size = sizeof(int);
+    // size_t ns = items * size;
 
-    int *nam = (int *) malloc(ns),
-        *nbm = (int *) malloc(ns),
-        *npm = (int *) malloc(ns);
+    int *nam = (int *) calloc(items, size),
+        *nbm = (int *) calloc(items, size),
+        *npm = (int *) calloc(items, size);
 
-    memset(nam, 0, ns); memset(nbm, 0, ns); memset(npm, 0, ns);
+    // maybe instead of doing this memset thing, we can try to do calloc
+    // memset(nam, 0, ns); memset(nbm, 0, ns); memset(npm, 0, ns);
 
     matrix na = {nam, d+1},
            nb = {nbm, d+1},
            np = {npm, d+1};
 
     // copy a and b to d+1 matrices and pad with zeroes
+
+    for (int i = 0; i < d; ++i) {
+      for (int j = 0; j < d; ++j) {
+        na.m[(i * (d + 1)) + j] = a.m[((i + ac.toprow) * a.od) + j + ac.leftcolumn];
+        nb.m[(i * (d + 1)) + j] = b.m[((i + bc.toprow) * b.od) + j + bc.leftcolumn];
+      }
+    }
+
+
+    // this stuff below didn't take into account the fact that we were looking
+    // at possibly huge matrices a and b where we are looking at only the
+    // corners specified by ac and bc.
+    /*
     for (int i = 0; i < d+1; ++i){
       for (int j = 0; j < d; ++j){
         na.m[i * (d+1) + j] = a.m[i*d + j];
@@ -99,8 +115,15 @@ void strass(matrix a, corner ac, matrix b, corner bc, matrix p, int d, int n0) {
         }
       }
     }
+    */
 
-    strass(na, ac, nb, bc, np, d+1, n0);
+
+    corner zero = {0, 0};
+
+    // this used to just pass in the corners ac and bc which def wouldn't have
+    // worked in our new smaller matrices
+
+    strass(na, zero, nb, zero, np, d+1, n0);
 
     // copy np into p, trimming zeroes
 
@@ -109,6 +132,8 @@ void strass(matrix a, corner ac, matrix b, corner bc, matrix p, int d, int n0) {
         p.m[i*d + j] = np.m[i * (d+1) + j];
       }
     }
+
+    free(nam); free(nbm); free(npm);
 
 
   } else {
@@ -161,29 +186,6 @@ void strass(matrix a, corner ac, matrix b, corner bc, matrix p, int d, int n0) {
     strass(apdm, topleft, ephm, topleft, p5m, hd, n0);
     strass(bmdm, topleft, gphm, topleft, p6m, hd, n0);
     strass(amcm, topleft, epfm, topleft, p7m, hd, n0);
-    /*
-    for (int i = 0; i < hd; ++i)
-      for (int j = 0; j < hd; ++j)
-        printf("%d\n", p1[(i * hd) + j]);
-    for (int i = 0; i < hd; ++i)
-      for (int j = 0; j < hd; ++j)
-        printf("%d\n", p2[(i * hd) + j]);
-    for (int i = 0; i < hd; ++i)
-      for (int j = 0; j < hd; ++j)
-        printf("%d\n", p3[(i * hd) + j]);
-    for (int i = 0; i < hd; ++i)
-      for (int j = 0; j < hd; ++j)
-        printf("%d\n", p4[(i * hd) + j]);
-    for (int i = 0; i < hd; ++i)
-      for (int j = 0; j < hd; ++j)
-        printf("%d\n", p5[(i * hd) + j]);
-    for (int i = 0; i < hd; ++i)
-      for (int j = 0; j < hd; ++j)
-        printf("%d\n", p6[(i * hd) + j]);
-    for (int i = 0; i < hd; ++i)
-      for (int j = 0; j < hd; ++j)
-        printf("%d\n", p7[(i * hd) + j]);
-        */
 
     // calculating the four submatrices
     add(p6m, topleft, add(p5m, topleft, subtract(p4m, topleft, p2m, topleft, p, topleft, hd), topleft, p, topleft, hd), topleft, p, topleft, hd);
@@ -230,6 +232,9 @@ int main(int argc, char *argv[]) {
          bm = {b, d},
          sm = {s, d};
 
+
+  // strass(am, zero, bm, zero, sm, d, 24);
+
   for (int i = 1 << 3; i < (1 << 8); i = i << 1) {
     memset(s, 0, d * d * sizeof(int));
     clock_t start = clock(), elapsed;
@@ -253,9 +258,11 @@ int main(int argc, char *argv[]) {
 
 
   
+  /*
   for (int i = 0; i < d; ++i) {
     printf("%d\n", s[(i * d) + i]);
   }
+  */
   
 
   free(s); free(a); free(b);
