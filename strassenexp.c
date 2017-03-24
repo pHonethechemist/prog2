@@ -3,7 +3,7 @@
 #include <time.h>
 #include <string.h>
 
-// contains an array with the matrix's original dimension (od)
+// contains an array with the matrix's original dimension
 typedef struct {
   int *m;
   int od;
@@ -72,10 +72,14 @@ void strass(matrix a, corner ac, matrix b, corner bc, matrix p, int d, int n0) {
 
     size_t items = (d + 1) * (d + 1);
     size_t size = sizeof(int);
+    // size_t ns = items * size;
 
     int *nam = (int *) calloc(items, size),
         *nbm = (int *) calloc(items, size),
         *npm = (int *) calloc(items, size);
+
+    // maybe instead of doing this memset thing, we can try to do calloc
+    // memset(nam, 0, ns); memset(nbm, 0, ns); memset(npm, 0, ns);
 
     matrix na = {nam, d+1},
            nb = {nbm, d+1},
@@ -90,7 +94,34 @@ void strass(matrix a, corner ac, matrix b, corner bc, matrix p, int d, int n0) {
       }
     }
 
+
+    // this stuff below didn't take into account the fact that we were looking
+    // at possibly huge matrices a and b where we are looking at only the
+    // corners specified by ac and bc.
+    /*
+    for (int i = 0; i < d+1; ++i){
+      for (int j = 0; j < d; ++j){
+        na.m[i * (d+1) + j] = a.m[i*d + j];
+        nb.m[i * (d+1) + j] = b.m[i*d + j];
+
+        if (i == d){
+          na.m[i * (d+1) + j] = 0;
+          nb.m[i * (d+1) + j] = 0;
+        }
+
+        if (j == d-1){
+          na.m[(i+1) * d] = 0;
+          nb.m[(i+1) * d] = 0;
+        }
+      }
+    }
+    */
+
+
     corner zero = {0, 0};
+
+    // this used to just pass in the corners ac and bc which def wouldn't have
+    // worked in our new smaller matrices
 
     strass(na, zero, nb, zero, np, d+1, n0);
 
@@ -202,11 +233,43 @@ int main(int argc, char *argv[]) {
          sm = {s, d};
 
 
-  strass(am, zero, bm, zero, sm, d, 40);
+  // strass(am, zero, bm, zero, sm, d, 24);
   
+
+  sprintf(buf, "%dres.txt", d);
+  FILE *out = fopen(buf, "w");
+  for (int i = 0; i < 5; ++i) {
+    memset(s, 0, d * d * sizeof(int));
+    clock_t start = clock(), elapsed;
+    normalmultiply(am, zero, bm, zero, sm, d);
+    elapsed = clock() - start;
+    int t = elapsed * 1000000 / CLOCKS_PER_SEC;
+    int sec = t / 1000000;
+    int ms = (t - (sec * 1000000)) / 1000;
+    int us = t % 1000;
+    fprintf(out, "normalmultiply %d: %ds%dms%dus\n", i + 1, sec, ms, us);
+  }
+  fclose(out);
+
+  /*
+  clock_t start = clock(), elapsed;
+  elapsed = clock() - start;
+  int t = elapsed * 1000000 / CLOCKS_PER_SEC;
+  int sec = t / 1000000;
+  int ms = (t - (sec * 1000000)) / 1000;
+  int us = t % 1000;
+  */
+
+
+  
+  // this is important to include in the program that we submit because this
+  // gives the elements on the diagonal.
+  /*
   for (int i = 0; i < d; ++i) {
     printf("%d\n", s[(i * d) + i]);
   }
+  */
+  
 
   free(s); free(a); free(b);
 
