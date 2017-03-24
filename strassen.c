@@ -3,7 +3,7 @@
 #include <time.h>
 #include <string.h>
 
-#define N0 60
+#define N0 40
 
 // contains an array with the matrix's original dimension (od)
 typedef struct {
