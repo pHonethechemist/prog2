@@ -238,7 +238,7 @@ int main(int argc, char *argv[]) {
 
   sprintf(buf, "%dres.txt", d);
   FILE *out = fopen(buf, "w");
-  for (int i = 0; i < 5; ++i) {
+  // for (int i = 100; i < 1251; i += 50) {
     memset(s, 0, d * d * sizeof(int));
     clock_t start = clock(), elapsed;
     normalmultiply(am, zero, bm, zero, sm, d);
@@ -247,8 +247,8 @@ int main(int argc, char *argv[]) {
     int sec = t / 1000000;
     int ms = (t - (sec * 1000000)) / 1000;
     int us = t % 1000;
-    fprintf(out, "normalmultiply %d: %ds%dms%dus\n", i + 1, sec, ms, us);
-  }
+    fprintf(out, "normalmultiply %d: %ds%dms%dus\n", d, sec, ms, us);
+  // }
   fclose(out);
 
   /*

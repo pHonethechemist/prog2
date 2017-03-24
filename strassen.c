@@ -3,6 +3,8 @@
 #include <time.h>
 #include <string.h>
 
+#define N0 60
+
 // contains an array with the matrix's original dimension (od)
 typedef struct {
   int *m;
@@ -202,7 +204,7 @@ int main(int argc, char *argv[]) {
          sm = {s, d};
 
 
-  strass(am, zero, bm, zero, sm, d, 40);
+  strass(am, zero, bm, zero, sm, d, N0);
   
   for (int i = 0; i < d; ++i) {
     printf("%d\n", s[(i * d) + i]);
